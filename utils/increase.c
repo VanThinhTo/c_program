@@ -9,23 +9,33 @@ then the output is: 4
 */
 
 void increase(void){
-    int x, previous, first=1, count=0, max_count = 0;
+    int n;
+    int first=1;
+    int previous;
+    int count=0;
+    int max_count=0;
 
-    while (scanf("%d", &x) == 1) {
+    while ((scanf("%d", &n)==1)){
         if (first){
-            previous = x;
-            first = 0;
-        } 
-        else if (x < previous) {
-            printf("\n");
-            if (count > max_count){
-                max_count = count;
-            }
-            count = 0;
+            first=0;
+            count++;
+            max_count=count;
         }
-        printf("%d ", x);
-        previous = x;
-        count+=1;
+        else{
+            if (previous<n){
+                count++;
+                if (count > max_count){
+                    max_count = count;
+                }
+            }
+            else{
+                if (count > max_count){
+                    max_count = count;
+                }
+                count=1;
+            }
+        }
+        previous=n;
     }
 
     printf("\n");

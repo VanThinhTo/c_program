@@ -12,7 +12,7 @@ int interval(void){
     int begin2, end2;
     scanf("%d %d", &begin2, &end2);
 
-    if (end1<=begin2 || end2<=begin1){
+    if (end1<begin2 || end2<begin1){
         printf("Disjoint");
     }
     // else if (end1==begin2 || end2==begin1){

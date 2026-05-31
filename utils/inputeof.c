@@ -2,8 +2,7 @@
 #include <stdio.h>
 // #include <string.h>
 
-int inputeof(void)
-{
+int inputeof(void){
     // Variable to store each number read
     int num;
     // Counter for number of integers read

@@ -38,7 +38,7 @@ int daysPerMonth(int month, int year){
 
 //check if the date is valid
 int validDate(int day, int month, int year){
-    if (daysPerMonth(month, year)==0 || day>daysPerMonth(month, year))
+    if (daysPerMonth(month, year)==0 || day!=daysPerMonth(month, year))
         return 0;
     else if (day<0 || year<0)
         return 0;

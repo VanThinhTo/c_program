@@ -5,9 +5,9 @@ int main(){
     char ch;
 
     scanf("%d", &n);
-    scanf(" %c\n", &ch);
+    scanf(" %c", &ch);
     while (ch!='c'){
-        scanf(" %c\n", &ch);
+        scanf(" %c", &ch);
     }
     return 0;
 }

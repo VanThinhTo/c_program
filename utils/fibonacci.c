@@ -13,11 +13,35 @@ void fibonacci(void){
     unsigned n;
     scanf("%u", &n);
     int fibo_1 = 0, fibo_2 = 1;
-    for (int i=1; i<=n;i++){
+
+    if (n<=0){
+        return;
+    }
+    
+    printf("1 ");
+
+    for (int i=2; i<=n;i++){
         int temp;
         temp = fibo_1 + fibo_2;
         printf("%d ", temp);           
         fibo_1 = fibo_2;
         fibo_2 = temp;
+    }
+}
+
+//recursion
+int fibo(int n){
+    if (n<=0){
+        return 0;
+    }
+    else{
+        //base case
+        if (n<=2){
+            return 1;
+        }
+        //recursive
+        else{
+            return fibo(n-1)+fibo(n-2);
+        }
     }
 }

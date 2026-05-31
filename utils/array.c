@@ -17,7 +17,7 @@ void printElement(int a[], int size){
 
 //Compute the average of elements
 double avgArr(int a[], int size){
-    int sum = 0;
+    float sum = 0;
     for (int i=0; i<size; i++){
         sum+=a[size];
     }
@@ -300,9 +300,12 @@ int myStrcmp(char *s1, char *s2){
         i++;
     }
 
+    //s1 is longer than s2
     if (s1[i]=='\0' && s2[i]!='\0'){
         return -1;
     }
+
+    //s2 is longer than s1
     else if (s1[i]!='\0' && s2[i]=='\0'){
         return 1;
     }
@@ -390,6 +393,36 @@ void baseCon(int n, int b){
     else{
         baseCon(n/b, b);
         printf("%c", symbol[n%b]);
+    }
+}
+
+void baseConvert(int n, int b){
+    char symbol[] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
+
+    char result[32];
+    int i=0;
+
+    if (b<2 || b>16){
+        printf("Invalid base\n");
+        return;
+    }
+
+    if (n==0){
+        printf("0");
+        return;
+    }
+
+    while (n>0){
+        result[i]=symbol[n%b];
+        n=n/b;
+        i++;
+    }
+
+    for (int j=i-1; j>=0; j--){
+        printf("%c", result[j]);
     }
 }
 
