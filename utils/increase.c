@@ -10,34 +10,29 @@ then the output is: 4
 
 void increase(void){
     int n;
-    int first=1;
     int previous;
-    int count=0;
-    int max_count=0;
+    int count=1;
+    int max_count=1;
 
-    while ((scanf("%d", &n)==1)){
-        if (first){
-            first=0;
+    if (scanf("%d", &previous)!=1){
+        printf("No input\n");
+        return;
+    }
+
+    while (scanf("%d", &n)==1){
+        if (n>=previous){
             count++;
-            max_count=count;
         }
         else{
-            if (previous<n){
-                count++;
-                if (count > max_count){
-                    max_count = count;
-                }
-            }
-            else{
-                if (count > max_count){
-                    max_count = count;
-                }
-                count=1;
-            }
+            count=1;
         }
+
+        if (count>max_count){
+            max_count=count;
+        }
+
         previous=n;
     }
 
-    printf("\n");
-    printf("Max monotone length: %d", max_count);
+    printf("Max monotone length: %d\n", max_count);
 }
