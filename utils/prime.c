@@ -15,7 +15,7 @@ int is_prime(unsigned n){
         return 1;
     }
     else if (n%2==0){
-        return 1;
+        return 0;
     }
 
     for (int i=3; i<=n/i; i+=2){

@@ -10,9 +10,9 @@ typedef struct {
 
 int size; // logical current size of the deck
 
-typedef struct{
+// typedef struct{
     
-} DECK;
+// } DECK;
 
 void createDeck(Card deck[]){
     char *values[] = {

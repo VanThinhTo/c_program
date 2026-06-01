@@ -49,6 +49,7 @@ int sumMatrix(int rows, int cols, int (*m)[cols]){
 //Access elements using flatten memory
 void printMatrixFlatten(int rows, int cols, int (*m)[cols]){
     int *p=&m[0][0];
+    //we can do this because the memories are continuous
     for (int i=0;i<rows*cols;i++){
         printf("%d ", *(p+i));
     }

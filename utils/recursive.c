@@ -27,11 +27,20 @@ double power_eff(double base, unsigned n){
 
 //hanoi tower
 void move(unsigned n, unsigned source, unsigned dest, unsigned spare){
+    //base case
+    //have only one disk, we move it from the source to the destination
     if (n==1)
         printf("%u -> %u\n", source, dest);
+
+    //recursive
     if (n>1){
+        //move n-1 disks from source to spare or helper
         move(n-1, source, spare, dest);
+
+        //move the largest disk from the source to destination
         move(1, source, dest, spare);
+
+        //move n-1 disks from helper to destination
         move(n-1, spare, dest, source);
     }
 }
@@ -67,6 +76,22 @@ void pattern(int n){
     printf("%d ", n);
     pattern(n-5);
     printf("%d ", n);
+}
+
+void pattern_2(int n){
+    int temp = n;
+
+    printf("%d ", n);
+
+    while (n>0){
+        n = n -5;
+        printf("%d ", n);
+    }
+
+    while (n<temp){
+        n = n + 5;
+        printf("%d ", n);
+    }
 }
 
 void pattern_ite(int n){
@@ -112,6 +137,22 @@ int is_binary_num(unsigned n){
         n = n/10;
     }
     return 1;
+}
+
+int is_binary_number(int n){
+    //base case
+    if (n==0){
+        return 1;
+    }
+
+    int last_digit = n%10;
+
+    if ((last_digit!=0) && (last_digit!=1)){
+        return 0;
+    }
+    
+    //recursive
+    return is_binary_num(n/10);
 }
 
 //binary search
