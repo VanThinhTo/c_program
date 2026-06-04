@@ -451,7 +451,7 @@ int anagrams(){
         s2[j]=c;
         j++;
     }
-    s2[j] = '\0'; 
+    s2[j] = '\0';
 
 
     int freq_s1[26]={0};

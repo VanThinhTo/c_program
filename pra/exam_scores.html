@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exam Scores and Comments</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      margin: 32px auto;
+      max-width: 960px;
+      padding: 0 20px;
+      color: #202124;
+      background: #ffffff;
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      border-top: 1px solid #d8dee4;
+      font-size: 22px;
+      margin-top: 32px;
+      padding-top: 24px;
+    }
+
+    .note {
+      color: #555;
+      margin-bottom: 28px;
+    }
+
+    .score {
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .skipped {
+      color: #7a4f01;
+    }
+
+    ul {
+      margin-top: 6px;
+    }
+
+    code {
+      background: #f6f8fa;
+      border-radius: 4px;
+      font-family: Consolas, Monaco, monospace;
+      padding: 1px 4px;
+    }
+
+    pre {
+      background: #f6f8fa;
+      border: 1px solid #d8dee4;
+      border-radius: 6px;
+      overflow-x: auto;
+      padding: 12px;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Scores and Comments for <code>exam_1.c</code> to <code>exam_10.c</code></h1>
+  <p class="note"><code>exam_7.c</code> is skipped as requested.</p>
+
+  <h2><code>exam_1.c</code> - First Prime Numbers and Sum</h2>
+  <p class="score">Score: 8.5/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly implements <code>is_prime</code>.</li>
+    <li>Correctly prints the first <code>n</code> prime numbers.</li>
+    <li>Correctly calculates and prints the sum.</li>
+    <li>Matches the sample output for <code>n = 6</code>.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Check whether <code>scanf</code> succeeds.</li>
+    <li>Do not use <code>unsigned n</code> if you want to reject negative input. With <code>%u</code>, negative input can become a very large unsigned number.</li>
+    <li>The prime loop works, but it can be optimized by checking only up to <code>i &lt;= n / i</code>.</li>
+    <li>Add a newline after <code>"Invalid input"</code>.</li>
+  </ul>
+
+  <h2><code>exam_2.c</code> - Monthly Calendar</h2>
+  <p class="score">Score: 9/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly validates <code>days</code> and <code>start</code>.</li>
+    <li>Correctly prints the calendar header.</li>
+    <li>Correctly aligns day <code>1</code> based on the starting weekday.</li>
+    <li>Correctly starts a new line after Saturday.</li>
+    <li>Matches the sample calendar layout.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Add a final newline when the month does not end on Saturday.</li>
+    <li>Error messages should end with <code>\n</code>.</li>
+    <li>The prompts are okay for interactive use, but the sample output in the exercise does not include prompts.</li>
+  </ul>
+
+  <h2><code>exam_3.c</code> - Reversed Cross Word</h2>
+  <p class="score">Score: 8.5/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Does not use <code>string.h</code>.</li>
+    <li>Correctly implements a custom string length function.</li>
+    <li>Correctly checks that the word length is odd.</li>
+    <li>Correctly prints the vertical word and reversed horizontal word.</li>
+    <li>Matches the sample output for <code>MANDARINO</code>.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Use a width limit in <code>scanf</code>, for example <code>scanf("%99s", s)</code>, to avoid writing past the end of the array.</li>
+    <li>Check whether <code>scanf</code> succeeds.</li>
+    <li>Use <code>MAX_WORD</code> consistently instead of hardcoding <code>100</code>.</li>
+    <li>Add a newline after the error message for even-length input.</li>
+  </ul>
+
+  <h2><code>exam_4.c</code> - Student Grades, Average, and Mode</h2>
+  <p class="score">Score: 8/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly defines the <code>Student</code> structure.</li>
+    <li>Correctly converts numeric grades to letter grades.</li>
+    <li>Correctly reads and prints the sample input.</li>
+    <li>Correctly calculates the average for the sample.</li>
+    <li>Correctly prints multiple mode grades.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Check whether reading <code>n</code> succeeds.</li>
+    <li>Validate that <code>n &gt; 0</code> and <code>n &lt;= MAX_STUDENTS</code>.</li>
+    <li>Avoid <code>Student students[n]</code> before validating <code>n</code>.</li>
+    <li>Validate each grade before using <code>freq[students[i].grade - 18]</code>.</li>
+    <li>If reading one student fails, stop instead of later printing uninitialized data.</li>
+    <li>Remove the trailing space after the last mode value.</li>
+  </ul>
+
+  <h2><code>exam_5.c</code> - Merge Two Sorted Arrays and Search</h2>
+  <p class="score">Score: 8.5/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly merges the sample sorted arrays.</li>
+    <li>Correctly handles duplicate values during merge.</li>
+    <li>Correctly implements recursive binary search for the sample.</li>
+    <li>Correctly finds target <code>7</code> at index <code>6</code>.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Check whether all <code>scanf</code> calls succeed.</li>
+    <li>Validate <code>n</code> and <code>m</code> before creating variable-length arrays.</li>
+    <li>Use a simpler binary search base case: <code>if (left &gt; right) return -1;</code>.</li>
+    <li>Output wording does not exactly match the example. It prints <code>"Found 7 at index 6"</code> instead of <code>"Found at index 6"</code>.</li>
+    <li>Add a newline after the final output.</li>
+  </ul>
+
+  <h2><code>exam_6.c</code> - Pointers, Array Reversal, and Matrix Sum</h2>
+  <p class="score">Score: 9/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly implements <code>swap</code>.</li>
+    <li>Correctly reverses the array.</li>
+    <li>Correctly calculates the matrix sum.</li>
+    <li>Matches the sample output.</li>
+    <li>Uses functions with the requested signatures.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Check whether all <code>scanf</code> calls succeed.</li>
+    <li>Validate <code>n</code>, <code>rows</code>, and <code>cols</code> before creating variable-length arrays.</li>
+    <li><code>reverse_pointer</code> works, but it mostly uses array indexing. To practice pointer arithmetic more directly, use expressions like <code>arr + i</code>.</li>
+    <li>Add a newline after <code>"Matrix sum: ..."</code>.</li>
+  </ul>
+
+  <h2><code>exam_7.c</code> - Date Validation, Ordinal Day, and Next Date</h2>
+  <p class="score skipped">Score: skipped</p>
+  <p>Skipped as requested because you already worked on this exercise yesterday.</p>
+
+  <h2><code>exam_8.c</code> - Text Analysis Until EOF</h2>
+  <p class="score">Score: 8/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly uses <code>getchar</code> until EOF.</li>
+    <li>Correctly implements <code>is_letter</code> and <code>is_vowel</code>.</li>
+    <li>Correctly counts words, vowels, and consonants for the sample input.</li>
+    <li>Correctly ignores non-letter characters when counting vowels and consonants.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>The longest word is not updated if the input ends while still inside a word. For example, input <code>hello</code> with no final newline prints longest length <code>0</code>.</li>
+    <li>Remove the unused <code>str_len</code> function.</li>
+    <li>The logic is good, but update <code>max_len</code> once more after the loop if <code>len_word &gt; max_len</code>.</li>
+  </ul>
+
+  <h2><code>exam_9.c</code> - Recursive Pascal Triangle</h2>
+  <p class="score">Score: 8.5/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly implements the recursive combination formula.</li>
+    <li>Correctly prints Pascal's Triangle values.</li>
+    <li>The output shape is close to the required triangle.</li>
+    <li>Matches the sample values for <code>n = 5</code>.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li>Check whether <code>scanf</code> succeeds.</li>
+    <li>Validate that <code>n &gt; 0</code>; the question requires printing <code>"Invalid input"</code> for invalid values.</li>
+    <li>Recursive combination repeats many calculations, so it becomes slow for larger <code>n</code>. This is acceptable for the recursive requirement, but worth knowing.</li>
+    <li>Formatting is slightly different from the exact sample spacing.</li>
+  </ul>
+
+  <h2><code>exam_10.c</code> - Polynomial Structure</h2>
+  <p class="score">Score: 7/10</p>
+  <p><strong>Good:</strong></p>
+  <ul>
+    <li>Correctly defines the <code>Polynomial</code> structure.</li>
+    <li><code>init_poly</code> now clears all coefficients before setting the requested term.</li>
+    <li><code>coeff_at</code>, <code>degree</code>, <code>sum</code>, and <code>print_poly</code> mostly follow the requirement.</li>
+    <li>The sample-style test output is close to correct.</li>
+  </ul>
+  <p><strong>To improve:</strong></p>
+  <ul>
+    <li><code>prod</code> has a serious out-of-bounds bug:</li>
+  </ul>
+  <pre><code>result.coeff[i+j] += coeff_at(p1, i)*coeff_at(p2, j);</code></pre>
+  <p>Since <code>i</code> and <code>j</code> both go from <code>0</code> to <code>MAX_DEGREE</code>, <code>i + j</code> can be greater than <code>MAX_DEGREE</code>. That writes past the end of <code>result.coeff</code>.</p>
+  <p>Add this guard inside the nested loops:</p>
+  <pre><code>if (i + j &lt;= MAX_DEGREE){
+    result.coeff[i+j] += coeff_at(p1, i) * coeff_at(p2, j);
+}</code></pre>
+  <ul>
+    <li>Check whether <code>init_poly</code> returns <code>NULL</code> in <code>main</code>.</li>
+    <li>Check whether <code>prod</code> returns <code>NULL</code> before printing the result.</li>
+    <li>The test in <code>main</code> is useful, but it does not test invalid exponent or degree overflow cases.</li>
+  </ul>
+
+  <h2>Overall Comment</h2>
+  <p>Most exercises compile and the sample behavior is generally good. The main pattern to improve is input validation: check every <code>scanf</code>, validate array sizes before creating arrays, and guard array indexes before writing into them.</p>
+</body>
+</html>

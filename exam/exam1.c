@@ -28,34 +28,35 @@ engib
 */
 
 int main(int argc, char *argv[]){
-  
-  if (argc != 2) {
-    printf("Usage: %s word\n", argv[0]);
-    return 1;
-  }
-
-  char *word = argv[1];
-  
-  int len=0;
-  while (word[len]!='\0'){
-    len++;
-  }
-
-  int mid=len/2;
-
-  for (int i=0; i<len; i++){
-    if (i==mid){
-      for (int j=len-1; j>=0; j--){
-        printf("%c",word[j]);
-      }
-      printf("\n");
+    if (argc!=2){
+        printf("InputError: Should have 2 argc!");
+        return 0;
     }
-    else{
-      for (int j=0; j<mid; j++){
-        printf(" ");
-      }
-      printf("%c\n", word[i]);
+
+    char *s = argv[1];
+
+    int len=strlen(s);
+
+    if (len%2==0){
+        printf("The length of %s should be odd", argv[1]);
+        return 0;
     }
-  }
-  return 0;
+
+    int mid=len/2;
+
+    for (int i=0; i<len; i++){
+        if (i!=mid){
+            for (int j=0; j<mid; j++){
+                printf(" ");
+            }
+            printf("%c", s[i]);
+        }
+        else{
+            for (int k=len-1; k>=0; k--){
+                printf("%c", s[k]);
+            }
+        }     
+        printf("\n");   
+    }
+    return 0;
 }

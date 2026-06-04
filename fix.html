@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exercise Fix Notes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f5;
+      --paper: #ffffff;
+      --text: #1d242b;
+      --muted: #5d6873;
+      --line: #d9ded8;
+      --accent: #166b5b;
+      --code-bg: #edf3f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 28px 22px;
+      border-right: 1px solid var(--line);
+      background: #eef1ed;
+    }
+    nav strong {
+      display: block;
+      margin-bottom: 14px;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    nav a {
+      display: block;
+      padding: 7px 0;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(22, 107, 91, 0.12);
+    }
+    nav a:hover { text-decoration: underline; }
+    main {
+      width: min(100%, 1040px);
+      padding: 36px clamp(20px, 5vw, 64px) 64px;
+    }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: clamp(24px, 4vw, 48px);
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+    }
+    h2 {
+      margin: 36px 0 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      font-size: 1.45rem;
+    }
+    h3 {
+      margin: 26px 0 8px;
+      font-size: 1.08rem;
+      color: #25313a;
+    }
+    p { margin: 0 0 14px; }
+    ul, ol {
+      margin: 0 0 16px 1.35rem;
+      padding: 0;
+    }
+    li { margin: 6px 0; }
+    code {
+      padding: 0.08rem 0.28rem;
+      border-radius: 4px;
+      background: var(--code-bg);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+    @media (max-width: 820px) {
+      .layout { display: block; }
+      nav {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      main { padding: 22px 14px 36px; }
+      article { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav aria-label="Sections">
+      <strong>Sections</strong>
+      <a href="#highest-priority-fixes">Highest priority fixes</a>
+<a href="#compiler-errors-found">Compiler errors found</a>
+<a href="#root-files">Root files</a>
+<a href="#exam-directory">`exam/` directory</a>
+<a href="#pra-directory">`pra/` directory</a>
+<a href="#utils-directory">`utils/` directory</a>
+    </nav>
+    <main>
+      <article>
+<h1 id="fix-notes">Fix Notes</h1>
+<p>Scope: reviewed the C source exercises in this repository. The PDF files under <code>C/</code> and <code>C/Exercises/</code> look like course/reference material, so the actionable debug comments below focus on source code.</p>
+<p>Checks used:</p>
+<ul>
+<li><code>clang -std=c11 -Wall -Wextra -Wpedantic -fsyntax-only</code> on each <code>.c</code> file.</li>
+<li>Manual source review for runtime behavior, input validation, array bounds, and exercise requirements.</li>
+</ul>
+<h2 id="highest-priority-fixes">Highest priority fixes</h2>
+<ol>
+<li><code>main.c</code> does not compile through <code>utils/import.h</code>.</li>
+</ol>
+<ul>
+<li><code>utils/import.h</code> includes <code>.c</code> implementation files directly. This pulls in extra <code>main</code> functions and duplicate/conflicting function definitions.</li>
+<li><code>utils/power_ex.c</code> defines <code>power(float, unsigned)</code> and has its own <code>main</code>, while <code>utils/pow.c</code> defines <code>power(double, unsigned)</code>.</li>
+<li><code>utils/recursive.c</code> defines two different functions named <code>pattern_2</code>.</li>
+<li>Suggested fix: make <code>utils/import.h</code> contain only prototypes, remove all <code>#include &quot;file.c&quot;</code> lines, compile <code>.c</code> files separately, and give duplicate functions unique names.</li>
+</ul>
+<ol>
+<li>Several files compile only as standalone exercises, not together.</li>
+</ol>
+<ul>
+<li>Many files define their own <code>main</code>, so they cannot be linked into one binary at the same time.</li>
+<li>Suggested fix: either keep one active exercise <code>main</code> at a time, or move reusable functions into utility files and keep exercise drivers separate.</li>
+</ul>
+<ol>
+<li>Input validation is inconsistent.</li>
+</ol>
+<ul>
+<li>Many exercises use <code>scanf</code> or <code>fgets</code> without checking the return value.</li>
+<li>Many array exercises create VLAs from unchecked input, for example <code>int arr[n]</code>.</li>
+<li>Suggested fix: always validate scan success and require positive sizes before declaring arrays.</li>
+</ul>
+<ol>
+<li>Unbounded string input appears in several places.</li>
+</ol>
+<ul>
+<li>Examples: <code>scanf(&quot;%s&quot;, s)</code> and scansets without widths.</li>
+<li>Suggested fix: use field widths such as <code>scanf(&quot;%99s&quot;, s)</code> and <code>%199[...]</code>.</li>
+</ul>
+<ol>
+<li>Some functions have undefined behavior from out-of-bounds array access.</li>
+</ol>
+<ul>
+<li>Major examples: <code>utils/array.c</code>, <code>pra/exam_10.c</code>, and <code>exam/example.c</code>.</li>
+</ul>
+<h2 id="compiler-errors-found">Compiler errors found</h2>
+<ul>
+<li><code>exam/exam1.c:38</code>: uses <code>strlen</code> without <code>#include &lt;string.h&gt;</code>.</li>
+<li><code>main.c</code> via <code>utils/import.h</code>: conflicting <code>power</code> definitions, duplicate <code>pattern_2</code>, and redefinition of <code>main</code>.</li>
+<li><code>utils/linkedlist.c:39</code>: function name <code>remove</code> conflicts with the standard library function <code>remove(const char *)</code>.</li>
+<li><code>utils/recursive.c:81</code> and <code>utils/recursive.c:118</code>: duplicate <code>pattern_2</code> definitions with different parameter types.</li>
+<li><code>utils/pointer.c:109</code> and <code>utils/pointer.c:114</code>: uses <code>validDate</code> and <code>daysPerMonth</code> without prototypes when compiled standalone.</li>
+</ul>
+<h2 id="root-files">Root files</h2>
+<h3 id="main-c"><code>main.c</code></h3>
+<ul>
+<li><code>main.c:1</code>: includes <code>utils/import.h</code>, which currently includes implementation <code>.c</code> files and makes this file fail to compile.</li>
+<li><code>main.c:30</code>, <code>main.c:45</code>, <code>main.c:78</code>, <code>main.c:79</code>: variables are created but not used in the active code path.</li>
+<li><code>main.c:80</code>: calls <code>anagrams()</code> without passing <code>s1</code> or <code>s2</code>. The local strings <code>s1</code> and <code>s2</code> are ignored because <code>anagrams()</code> reads from standard input.</li>
+<li>Suggested fix: choose one exercise to run, include only the correct prototypes, and call functions with clear inputs. For anagram testing, either pass strings to an anagram function or feed two words through stdin.</li>
+</ul>
+<h3 id="pra-c"><code>pra.c</code></h3>
+<ul>
+<li>This file currently contains comments and suggested calendar code only; it has no active <code>main</code>.</li>
+<li>Suggested fix: if it is meant to be runnable, uncomment or rewrite the solution outside the comment block. If it is only feedback, move the text into a markdown note.</li>
+</ul>
+<h2 id="exam-directory"><code>exam/</code> directory</h2>
+<h3 id="exam-exam-c"><code>exam/exam.c</code></h3>
+<ul>
+<li><code>exam/exam.c:5</code>: <code>strconcat</code> assumes <code>s1</code> has enough capacity for both strings. That matches <code>strcat</code> behavior, but it is unsafe if the caller passes a small buffer.</li>
+<li><code>exam/exam.c:27</code>: the active <code>main</code> only prints command-line arguments and does not test <code>strconcat</code>.</li>
+<li>Suggested fix: either add a test <code>main</code> for <code>strconcat</code>, or keep this as a utility function and document that the destination buffer must be large enough.</li>
+</ul>
+<h3 id="exam-exam1-c"><code>exam/exam1.c</code></h3>
+<ul>
+<li><code>exam/exam1.c:38</code>: missing <code>#include &lt;string.h&gt;</code> for <code>strlen</code>.</li>
+<li><code>exam/exam1.c:31</code>: <code>argc != 2</code> check is correct, but the error text says &quot;Should have 2 argc&quot;; better message: &quot;expected one word argument&quot;.</li>
+<li><code>exam/exam1.c:32</code>, <code>exam/exam1.c:41</code>: error messages should end with <code>\n</code>.</li>
+<li><code>exam/exam1.c:33</code>, <code>exam/exam1.c:42</code>: return <code>1</code> for invalid input instead of <code>0</code>.</li>
+</ul>
+<h3 id="exam-exam2-c"><code>exam/exam2.c</code></h3>
+<ul>
+<li><code>exam/exam2.c:22</code>, <code>exam/exam2.c:26</code>: <code>scanf</code> return values are not checked.</li>
+<li><code>exam/exam2.c:30</code>: <code>remain</code> is unused.</li>
+<li><code>exam/exam2.c:36</code>: calendar loop prints valid day numbers, but no input validation exists for <code>days</code> or <code>start</code>.</li>
+<li><code>exam/exam2.c:42</code>: <code>main</code> should return <code>0</code>.</li>
+<li>Suggested fix: validate <code>28 &lt;= days &lt;= 31</code>, <code>1 &lt;= start &lt;= 7</code>, add a final newline if the last week is incomplete, and return a status.</li>
+</ul>
+<h3 id="exam-exam3-c"><code>exam/exam3.c</code></h3>
+<ul>
+<li><code>exam/exam3.c:107</code>: <code>degree</code> is uninitialized if the polynomial is the zero polynomial. Initialize it to <code>0</code>.</li>
+<li><code>exam/exam3.c:139</code>: product degree check uses multiplication: <code>degree(p1) * degree(p2) &gt; MAXDEGREE</code>. The correct check is addition: <code>degree(p1) + degree(p2) &gt; MAXDEGREE</code>.</li>
+<li><code>exam/exam3.c:149</code>: product loops are guarded by <code>i + j &lt;= MAXDEGREE</code>, which avoids overflow, but if the degree check is wrong the function can silently drop terms instead of returning <code>NULL</code>.</li>
+<li><code>exam/exam3.c:167</code>: use <code>int main(void)</code>.</li>
+<li><code>exam/exam3.c:168</code> to <code>exam/exam3.c:170</code>: unused variables <code>p3</code>, <code>pt3</code>, and <code>sp3</code>.</li>
+</ul>
+<h3 id="exam-example-c"><code>exam/example.c</code></h3>
+<ul>
+<li><code>exam/example.c:47</code>: <code>desArr</code> should be <code>void desArr(void)</code>.</li>
+<li><code>exam/example.c:49</code>: check <code>scanf</code> and validate <code>n &gt; 0</code> before <code>int arr[n]</code>.</li>
+<li><code>exam/example.c:70</code>: <code>sum / n</code> divides by zero if <code>n</code> is zero.</li>
+<li><code>exam/example.c:123</code>: <code>pascalTriangle</code> should be <code>void pascalTriangle(void)</code> and should validate row count.</li>
+<li><code>exam/example.c:185</code>: <code>rotateArr</code> should be <code>void rotateArr(void)</code>.</li>
+<li><code>exam/example.c:204</code>: serious bug. The loop is <code>for (int p = pos; pos &lt; n; pos++)</code>, but it indexes <code>arr[p]</code>. <code>p</code> never changes, so the same element is copied repeatedly. Use <code>for (int p = pos; p &lt; n; p++)</code>.</li>
+<li><code>exam/example.c:280</code>: <code>consonants</code> should be <code>int consonants(void)</code>.</li>
+<li><code>exam/example.c:297</code>: requirement says output should be <code>Consonants: 19</code>, but the active code prints only the number.</li>
+</ul>
+<h3 id="exam-exercise-01-combination-c"><code>exam/exercise_01_combination.c</code></h3>
+<ul>
+<li><code>exam/exercise_01_combination.c:28</code>: recursive factorial works for small <code>n</code>, but <code>unsigned long long</code> overflows quickly. <code>21!</code> already exceeds the type.</li>
+<li><code>exam/exercise_01_combination.c:30</code>: factorial should not print errors itself if input is already validated in <code>main</code>.</li>
+<li><code>exam/exercise_01_combination.c:45</code>: use <code>int main(void)</code>.</li>
+<li><code>exam/exercise_01_combination.c:55</code>: output should end with <code>\n</code>.</li>
+<li><code>exam/exercise_01_combination.c:56</code>: success should return <code>0</code>, not <code>1</code>.</li>
+<li>Suggested fix: compute combinations with a multiplicative formula using <code>r = min(r, n - r)</code> to reduce overflow.</li>
+</ul>
+<h3 id="exam-exercise-01-combination-improved-c"><code>exam/exercise_01_combination_improved.c</code></h3>
+<ul>
+<li>This version is cleaner and compiles without warnings.</li>
+<li>Remaining issue: factorial-based combination still overflows for moderately large <code>n</code>.</li>
+<li>Suggested fix: use an iterative multiplicative combination function and optionally reject values that overflow <code>unsigned long long</code>.</li>
+</ul>
+<h3 id="exam-exercise-02-pascal-triangle-c"><code>exam/exercise_02_pascal_triangle.c</code></h3>
+<ul>
+<li><code>exam/exercise_02_pascal_triangle.c:38</code>: recursive <code>pascal</code> is correct for small rows, but repeats many calls and becomes slow quickly.</li>
+<li><code>exam/exercise_02_pascal_triangle.c:59</code>: use <code>int main(void)</code>.</li>
+<li><code>exam/exercise_02_pascal_triangle.c:61</code>: check <code>scanf</code> and validate <code>n &gt; 0</code>.</li>
+<li>Suggested fix: use the row-by-row formula already shown in <code>exercise_02_pascal_triangle_row_by_row.c</code> for better performance.</li>
+</ul>
+<h3 id="exam-exercise-02-pascal-triangle-row-by-row-c"><code>exam/exercise_02_pascal_triangle_row_by_row.c</code></h3>
+<ul>
+<li>This is a solid improved solution and compiles cleanly.</li>
+<li>Remaining issue: <code>unsigned long long</code> will overflow for large rows.</li>
+<li>Suggested fix: document a practical max row or add overflow checks.</li>
+</ul>
+<h3 id="exam-exercise-03-student-structure-c"><code>exam/exercise_03_student_structure.c</code></h3>
+<ul>
+<li><code>exam/exercise_03_student_structure.c:34</code>: use <code>Student InputStu(void)</code>.</li>
+<li><code>exam/exercise_03_student_structure.c:36</code>: check whether <code>fgets</code> succeeds.</li>
+<li><code>exam/exercise_03_student_structure.c:39</code>: scanset has no width limit, so a long name can overflow <code>s.name</code>.</li>
+<li><code>exam/exercise_03_student_structure.c:39</code>: <code>%[^0123456789]</code> leaves trailing spaces in the name and does not handle negative grades well.</li>
+<li><code>exam/exercise_03_student_structure.c:47</code>: final output should end with <code>\n</code>.</li>
+</ul>
+<h3 id="exam-exercise-03-student-structure-improved-c"><code>exam/exercise_03_student_structure_improved.c</code></h3>
+<ul>
+<li>This version is safer because it checks <code>fgets</code> and uses a width.</li>
+<li><code>exam/exercise_03_student_structure_improved.c:22</code>: use <code>Student InputStu(void)</code>.</li>
+<li><code>exam/exercise_03_student_structure_improved.c:32</code>: negative grades are parsed incorrectly because <code>-</code> is consumed as part of the name before <code>%d</code>.</li>
+<li>Suggested fix: trim trailing spaces from <code>name</code>, or read the last integer on the line more deliberately.</li>
+</ul>
+<h3 id="exam-exercise-04-grade-conversion-c"><code>exam/exercise_04_grade_conversion.c</code></h3>
+<ul>
+<li><code>exam/exercise_04_grade_conversion.c:62</code>: requirement says anything outside the valid ranges should be <code>X</code>, but the code returns <code>F</code> for every non-18-to-30 value.</li>
+<li><code>exam/exercise_04_grade_conversion.c:66</code>: use <code>Student InputStu(void)</code>.</li>
+<li><code>exam/exercise_04_grade_conversion.c:68</code>: check <code>fgets</code>.</li>
+<li><code>exam/exercise_04_grade_conversion.c:72</code>: scanset has no width limit and can overflow <code>s.name</code>.</li>
+<li>Requirement asks for a display function, but printing is done directly in <code>main</code>.</li>
+<li>Suggested fix: make <code>convertGrade</code> return <code>X</code> for grade <code>&lt; 0</code> or <code>&gt; 30</code>, add <code>displayStudent(Student s)</code>, and validate parsing.</li>
+</ul>
+<h2 id="pra-directory"><code>pra/</code> directory</h2>
+<h3 id="pra-exam-1-c"><code>pra/exam_1.c</code></h3>
+<ul>
+<li><code>pra/exam_1.c:52</code>: <code>n</code> is unsigned, so negative input through <code>%u</code> can become a huge positive value.</li>
+<li><code>pra/exam_1.c:53</code>: check <code>scanf</code> before using <code>n</code>.</li>
+<li><code>pra/exam_1.c:55</code>: <code>n &lt;= 0</code> only catches zero for an unsigned value.</li>
+<li><code>pra/exam_1.c:43</code>: prime test works, but it is inefficient. Loop only while <code>i &lt;= n / i</code>, and start from odd divisors after checking even numbers.</li>
+<li>Suggested fix: read into signed <code>int n</code>, validate <code>n &gt; 0</code>, then use <code>unsigned</code> internally if desired.</li>
+</ul>
+<h3 id="pra-exam-2-c"><code>pra/exam_2.c</code></h3>
+<ul>
+<li>Good overall calendar solution with validation.</li>
+<li><code>pra/exam_2.c:44</code>, <code>pra/exam_2.c:51</code>: error messages should end with <code>\n</code>.</li>
+<li><code>pra/exam_2.c:70</code>: add a final newline when the last calendar row is incomplete.</li>
+</ul>
+<h3 id="pra-exam-3-c"><code>pra/exam_3.c</code></h3>
+<ul>
+<li><code>pra/exam_3.c:48</code>: <code>scanf(&quot;%s&quot;, s)</code> can overflow <code>s</code>. Use <code>scanf(&quot;%99s&quot;, s)</code>.</li>
+<li><code>pra/exam_3.c:48</code>: check that <code>scanf</code> succeeds.</li>
+<li><code>pra/exam_3.c:53</code>: error message should end with <code>\n</code> and invalid input should return <code>1</code>.</li>
+<li>The exercise assumes odd length, but the validation is still useful and is already present.</li>
+</ul>
+<h3 id="pra-exam-4-c"><code>pra/exam_4.c</code></h3>
+<ul>
+<li><code>pra/exam_4.c:81</code>: check <code>scanf</code> and validate <code>n &gt; 0</code> and <code>n &lt;= MAX_STUDENTS</code> before declaring <code>students[n]</code>.</li>
+<li><code>pra/exam_4.c:91</code>: serious out-of-bounds risk. If grade is outside <code>18..30</code>, <code>freq[students[i].grade - 18]</code> indexes outside <code>freq</code>.</li>
+<li><code>pra/exam_4.c:88</code>: if a student line fails to scan, later printing uses uninitialized fields.</li>
+<li><code>pra/exam_4.c:99</code>: <code>sum / n</code> divides by zero if <code>n == 0</code>.</li>
+<li>Suggested fix: reject invalid grades or store letter <code>X</code> without counting them in the <code>freq</code> array.</li>
+</ul>
+<h3 id="pra-exam-5-c"><code>pra/exam_5.c</code></h3>
+<ul>
+<li><code>pra/exam_5.c:82</code>: binary search base case should be <code>if (left &gt; right) return -1;</code>. The current <code>left == right</code> base case can recurse into invalid ranges.</li>
+<li><code>pra/exam_5.c:93</code>: safer midpoint is <code>left + (right - left) / 2</code>.</li>
+<li><code>pra/exam_5.c:108</code>, <code>pra/exam_5.c:116</code>, <code>pra/exam_5.c:127</code>: check all <code>scanf</code> calls and validate <code>n &gt; 0</code>, <code>m &gt; 0</code>, and max sizes.</li>
+<li><code>pra/exam_5.c:136</code>: output format differs from the example. It prints <code>Found 7 at index 6</code> instead of <code>Found at index 6</code>.</li>
+</ul>
+<h3 id="pra-exam-6-c"><code>pra/exam_6.c</code></h3>
+<ul>
+<li>Logic for swap, reversal, and matrix sum is correct for valid input.</li>
+<li><code>pra/exam_6.c:63</code>, <code>pra/exam_6.c:71</code>, <code>pra/exam_6.c:72</code>: check <code>scanf</code> results.</li>
+<li><code>pra/exam_6.c:65</code>, <code>pra/exam_6.c:74</code>: validate <code>n &gt; 0</code>, <code>rows &gt; 0</code>, and <code>cols &gt; 0</code> before declaring VLAs.</li>
+<li><code>pra/exam_6.c:90</code>: add a final newline.</li>
+</ul>
+<h3 id="pra-exam-7-c"><code>pra/exam_7.c</code></h3>
+<ul>
+<li>This exercise is not implemented.</li>
+<li><code>pra/exam_7.c:43</code>, <code>pra/exam_7.c:48</code>, <code>pra/exam_7.c:53</code>, <code>pra/exam_7.c:58</code>, <code>pra/exam_7.c:62</code>: all required functions and <code>main</code> still contain TODOs.</li>
+<li>Suggested implementation:</li>
+<li><code>days_per_month</code>: return 31/30/28/29 based on month and leap year, return 0 for invalid month.</li>
+<li><code>valid_date</code>: require <code>year &gt; 0</code>, <code>1 &lt;= month &lt;= 12</code>, and <code>1 &lt;= day &lt;= days_per_month(month, year)</code>.</li>
+<li><code>ordinal</code>: sum days in previous months plus <code>day</code>.</li>
+<li><code>next_date</code>: increment day if possible, otherwise roll month/year.</li>
+</ul>
+<h3 id="pra-exam-8-c"><code>pra/exam_8.c</code></h3>
+<ul>
+<li><code>pra/exam_8.c:46</code>: <code>str_len</code> is unused.</li>
+<li><code>pra/exam_8.c:87</code>: longest word is updated only when a non-letter is read. If input ends while inside a word, the last word length is not considered.</li>
+<li>Suggested fix: after the <code>while</code> loop, run <code>if (len_word &gt; max_len) max_len = len_word;</code>.</li>
+</ul>
+<h3 id="pra-exam-9-c"><code>pra/exam_9.c</code></h3>
+<ul>
+<li><code>pra/exam_9.c:42</code>: check <code>scanf</code>.</li>
+<li>Requirement says if <code>n &lt;= 0</code>, print <code>Invalid input</code>; current code silently prints nothing.</li>
+<li>Recursive <code>combination</code> is correct but exponential. Good for small rows, slow for larger rows.</li>
+<li>Suggested fix: validate <code>n</code>, then use a row-by-row formula if performance matters.</li>
+</ul>
+<h3 id="pra-exam-10-c"><code>pra/exam_10.c</code></h3>
+<ul>
+<li><code>pra/exam_10.c:90</code>: degree check uses addition correctly.</li>
+<li><code>pra/exam_10.c:101</code> to <code>pra/exam_10.c:104</code>: serious out-of-bounds write. The nested loops always write <code>result.coeff[i + j]</code>, but <code>i + j</code> can be greater than <code>MAX_DEGREE</code>.</li>
+<li>Even if high-degree coefficients are zero, writing <code>result.coeff[21]</code> or beyond is undefined behavior.</li>
+<li>Suggested fix: inside the loops, only update when <code>i + j &lt;= MAX_DEGREE</code>, or better loop <code>j &lt;= MAX_DEGREE - i</code>.</li>
+<li><code>pra/exam_10.c:153</code>: check the return value of <code>prod</code> before printing, because it can return <code>NULL</code>.</li>
+</ul>
+<h2 id="utils-directory"><code>utils/</code> directory</h2>
+<h3 id="utils-import-h"><code>utils/import.h</code></h3>
+<ul>
+<li>Do not include <code>.c</code> files from a header. This is the source of many compile failures.</li>
+<li><code>utils/import.h:21</code>, <code>utils/import.h:24</code>, <code>utils/import.h:59</code>, <code>utils/import.h:74</code>, <code>utils/import.h:99</code>, <code>utils/import.h:100</code>: old-style prototypes like <code>int f();</code> should be <code>int f(void);</code> when no parameters are expected.</li>
+<li><code>utils/import.h:26</code> to <code>utils/import.h:27</code>: prototype says <code>int convert_binary(void)</code>, but the implementation is <code>void convertBinary(unsigned n)</code>.</li>
+<li>Suggested fix: keep only declarations in the header, make declarations match implementations, and add include guards in every header.</li>
+</ul>
+<h3 id="utils-array-c"><code>utils/array.c</code></h3>
+<ul>
+<li><code>utils/array.c:5</code>: loops to <code>i &lt; 10</code> over <code>char name[7]</code>, reading past the array.</li>
+<li><code>utils/array.c:22</code>: <code>avgArr</code> uses <code>a[size]</code> instead of <code>a[i]</code>, so it reads out of bounds and never sums the actual elements.</li>
+<li><code>utils/array.c:24</code>: check <code>size &gt; 0</code> before division.</li>
+<li><code>utils/array.c:34</code>: <code>minArr</code> uses <code>a[size]</code> instead of <code>a[i]</code>, also out of bounds.</li>
+<li><code>utils/array.c:66</code>: <code>valid_input</code> is uninitialized. Initialize it to <code>0</code>.</li>
+<li><code>utils/array.c:128</code>: <code>guessing</code> has no stop condition for impossible ranges if the user gives inconsistent answers.</li>
+<li><code>utils/array.c:261</code>: <code>extractInt</code> ignores minus signs and can overflow <code>digit[100]</code> for long strings.</li>
+<li><code>utils/array.c:382</code>: <code>baseCon</code> should validate <code>2 &lt;= b &lt;= 16</code> and handle <code>n == 0</code>.</li>
+<li><code>utils/array.c:430</code>: <code>freq_letter</code> treats uppercase letters as valid but indexes with <code>s[i] - &#x27;a&#x27;</code>, which is negative for uppercase letters. Convert to lowercase or handle <code>A..Z</code> separately.</li>
+<li><code>utils/array.c:444</code>, <code>utils/array.c:450</code>: <code>c</code> should be <code>int</code>, not <code>char</code>, when comparing to <code>EOF</code>.</li>
+<li><code>utils/array.c:444</code>, <code>utils/array.c:450</code>: add bounds checks before writing into <code>s1[100]</code> and <code>s2[100]</code>.</li>
+</ul>
+<h3 id="utils-card-c"><code>utils/card.c</code></h3>
+<ul>
+<li><code>utils/card.c:40</code>: <code>shuffleDeck</code> always uses 52 cards. If you want to shuffle the logical deck after cards are removed, use <code>size</code>.</li>
+<li><code>utils/card.c:42</code>: <code>rand()</code> is never seeded, so the shuffle is deterministic each run.</li>
+<li><code>utils/card.c:61</code>: <code>return deck_size--;</code> returns the old value and has no useful side effect outside the function.</li>
+<li><code>utils/card.c:65</code>: <code>getCard</code> can return <code>NULL</code>; callers should check before dereferencing.</li>
+<li><code>utils/card.c:83</code>: use <code>int main(void)</code>.</li>
+</ul>
+<h3 id="utils-convert-binary-c"><code>utils/convert_binary.c</code></h3>
+<ul>
+<li><code>utils/convert_binary.c:4</code>: implementation name/signature does not match <code>utils/import.h</code>.</li>
+<li><code>utils/convert_binary.c:8</code>: input <code>0</code> prints nothing. It should print <code>0</code>.</li>
+<li><code>utils/convert_binary.c:5</code>: fixed 32-element buffer is okay for 32-bit unsigned, but document the assumption.</li>
+</ul>
+<h3 id="utils-convert-time-c"><code>utils/convert_time.c</code></h3>
+<ul>
+<li><code>utils/convert_time.c:10</code>: check <code>scanf</code> and reject negative seconds.</li>
+<li><code>utils/convert_time.c:13</code>: remaining seconds can be greater than 59 because minutes are not computed. For example, 3661 seconds becomes 1 hour and 61 seconds.</li>
+<li>Suggested fix: compute days, hours, minutes, and seconds, or make clear that seconds means &quot;remaining after days and hours&quot;.</li>
+</ul>
+<h3 id="utils-cubes-c"><code>utils/cubes.c</code></h3>
+<ul>
+<li><code>utils/cubes.c:9</code>: use <code>int cubes(void)</code>.</li>
+<li><code>utils/cubes.c:13</code>: check <code>scanf</code>.</li>
+<li><code>utils/cubes.c:15</code>: <code>i * i * i</code> can overflow for large <code>n</code>. Use <code>i &lt;= n / i / i</code> style checks or a wider type.</li>
+</ul>
+<h3 id="utils-date-month-year-c"><code>utils/date_month_year.c</code></h3>
+<ul>
+<li><code>utils/date_month_year.c:16</code>: leap-year logic is correct, but add parentheses for readability: <code>((year % 4 == 0 &amp;&amp; year % 100 != 0) || year % 400 == 0)</code>.</li>
+<li><code>utils/date_month_year.c:21</code>: bug. <code>month &lt; 0 &amp;&amp; month &gt; 12</code> can never be true. Use <code>month &lt; 1 || month &gt; 12</code>.</li>
+<li><code>utils/date_month_year.c:43</code>: <code>day &lt; 0</code> allows day <code>0</code>. Use <code>day &lt; 1</code>.</li>
+<li><code>utils/date_month_year.c:40</code>: decide whether <code>year &lt;= 0</code> is invalid and check it consistently.</li>
+<li><code>utils/date_month_year.c:3</code>: <code>change</code> is unrelated to date logic; move it elsewhere or remove it.</li>
+</ul>
+<h3 id="utils-fibonacci-c"><code>utils/fibonacci.c</code></h3>
+<ul>
+<li><code>utils/fibonacci.c:14</code>: check <code>scanf</code>.</li>
+<li><code>utils/fibonacci.c:17</code>: <code>n</code> is unsigned, so <code>n &lt;= 0</code> only catches zero.</li>
+<li><code>utils/fibonacci.c:23</code>: use an unsigned loop index or make <code>n</code> signed after validation.</li>
+<li>Fibonacci values overflow <code>int</code> quickly.</li>
+</ul>
+<h3 id="utils-grid-c"><code>utils/grid.c</code></h3>
+<ul>
+<li><code>utils/grid.c:23</code>: check <code>scanf</code> and validate <code>n &gt; 0</code>.</li>
+<li><code>utils/grid.c:12</code>: <code>power_u</code> overflows quickly for larger <code>n</code>.</li>
+<li><code>utils/grid.c:14</code>: use unsigned loop variable to match <code>n</code>.</li>
+</ul>
+<h3 id="utils-increase-c"><code>utils/increase.c</code></h3>
+<ul>
+<li><code>utils/increase.c:23</code>: the exercise says &quot;increasing&quot;, but the code uses <code>n &gt;= previous</code>, which counts equal values as increasing.</li>
+<li>Suggested fix: use <code>n &gt; previous</code> for strictly increasing subsequences, or rename/comment it as non-decreasing.</li>
+</ul>
+<h3 id="utils-inputeof-c"><code>utils/inputeof.c</code></h3>
+<ul>
+<li>This is a reasonable EOF demo for integers.</li>
+<li>Minor suggestion: remove extra prompt text if the function is used in automated exercises, because prompts can break expected-output tests.</li>
+</ul>
+<h3 id="utils-interval-c"><code>utils/interval.c</code></h3>
+<ul>
+<li>The comment says <code>[1,5]</code> and <code>[5,10]</code> are disjoint, but the active code treats shared endpoints as joint.</li>
+<li><code>utils/interval.c:15</code>: use <code>end1 &lt;= begin2 || end2 &lt;= begin1</code> if touching endpoints are considered disjoint.</li>
+<li>Also validate that each interval has <code>begin &lt;= end</code>.</li>
+</ul>
+<h3 id="utils-linkedlist-c"><code>utils/linkedlist.c</code></h3>
+<ul>
+<li><code>utils/linkedlist.c:10</code>: check whether <code>malloc</code> returned <code>NULL</code>.</li>
+<li><code>utils/linkedlist.c:39</code>: rename <code>remove</code> to avoid conflict with the standard library, for example <code>pop_front</code>.</li>
+<li><code>utils/linkedlist.c:39</code> to <code>utils/linkedlist.c:45</code>: function promises to return the removed head node, but it does not return anything in the non-empty case.</li>
+<li>The current implementation loses the old head pointer, causing a memory leak.</li>
+<li>Suggested fix: store <code>Node *old = l-&gt;head</code>, advance <code>l-&gt;head</code>, update <code>tail</code> if the list becomes empty, set <code>old-&gt;next = NULL</code>, then return <code>old</code>.</li>
+</ul>
+<h3 id="utils-mergesort-c"><code>utils/mergesort.c</code></h3>
+<ul>
+<li>Merge sort logic is fine for the sample.</li>
+<li><code>utils/mergesort.c:69</code>: use <code>int main(void)</code>.</li>
+<li>If this is meant to be a reusable utility, remove the <code>main</code> function and expose only <code>mergeSort</code>.</li>
+</ul>
+<h3 id="utils-monotone-c"><code>utils/monotone.c</code></h3>
+<ul>
+<li><code>utils/monotone.c:13</code>, <code>utils/monotone.c:39</code>: use <code>(void)</code> in empty parameter lists.</li>
+<li><code>utils/monotone.c:15</code>, <code>utils/monotone.c:41</code>: check the first <code>scanf</code> before using <code>x</code>.</li>
+<li><code>previous = -1</code> assumes the input sequence is non-negative. That matches the sentinel rule, but it should be documented.</li>
+</ul>
+<h3 id="utils-odd-c"><code>utils/odd.c</code></h3>
+<ul>
+<li><code>utils/odd.c:9</code>: check <code>scanf</code> and validate <code>N &gt; 0</code>.</li>
+<li>Sums can overflow <code>int</code> for large <code>N</code>.</li>
+</ul>
+<h3 id="utils-pointer-c"><code>utils/pointer.c</code></h3>
+<ul>
+<li><code>utils/pointer.c:59</code>: <code>modifyMatrix</code> loops with <code>j &lt; 3</code> instead of <code>j &lt; cols</code>.</li>
+<li><code>utils/pointer.c:59</code>: the loops are unnecessary because the function already receives the target row and column.</li>
+<li><code>utils/pointer.c:96</code>: <code>normalize</code> should reject denominator zero.</li>
+<li><code>utils/pointer.c:98</code>: <code>gcd_iterative</code> should return a positive gcd for negative inputs.</li>
+<li><code>utils/pointer.c:109</code>: serious date bug. <code>validDate</code> expects <code>(day, month, year)</code>, but this call passes <code>(*month, *date, *year)</code>.</li>
+<li><code>utils/pointer.c:108</code>: parameter order is <code>month, date, year</code>, which is easy to mix up. Prefer <code>day, month, year</code> to match the validation functions.</li>
+</ul>
+<h3 id="utils-pow-c"><code>utils/pow.c</code></h3>
+<ul>
+<li><code>utils/pow.c:3</code>: conflicts with <code>utils/power_ex.c</code> because both define <code>power</code>.</li>
+<li>Suggested fix: keep one <code>power</code> implementation, or rename one function.</li>
+</ul>
+<h3 id="utils-power-ex-c"><code>utils/power_ex.c</code></h3>
+<ul>
+<li><code>utils/power_ex.c:7</code>: conflicts with <code>utils/pow.c</code>.</li>
+<li><code>utils/power_ex.c:7</code>: comment says base is a double, but the function uses <code>float</code>.</li>
+<li><code>utils/power_ex.c:15</code>: this file has a <code>main</code>, so it cannot be included from <code>utils/import.h</code>.</li>
+<li>Suggested fix: either make it a standalone exercise file or remove <code>main</code> and keep only a reusable function.</li>
+</ul>
+<h3 id="utils-prime-c"><code>utils/prime.c</code></h3>
+<ul>
+<li><code>utils/prime.c:36</code>: check <code>scanf</code>.</li>
+<li><code>utils/prime.c:40</code>: validate <code>n &gt; 0</code>; currently a negative <code>n</code> silently prints nothing.</li>
+<li><code>utils/prime.c:21</code>: use an unsigned loop variable to avoid signed/unsigned warnings.</li>
+</ul>
+<h3 id="utils-recursive-c"><code>utils/recursive.c</code></h3>
+<ul>
+<li><code>utils/recursive.c:23</code>: <code>power_eff</code> uses <code>power_rec</code> in the odd case, losing the efficiency benefit. Use <code>base * power_eff(base, n - 1)</code> or the standard exponentiation-by-squaring odd case.</li>
+<li><code>utils/recursive.c:81</code> and <code>utils/recursive.c:118</code>: duplicate <code>pattern_2</code> definitions cause a compile error. Rename one of them.</li>
+<li><code>utils/recursive.c:97</code>: <code>pattern_ite</code> has confusing control flow; the <code>if (n == 0)</code> branch after the loop is effectively unreachable for positive inputs.</li>
+<li><code>utils/recursive.c:155</code>: <code>is_binary_number</code> calls <code>is_binary_num</code> instead of recursively calling itself. It works through the iterative helper, but the function is not truly recursive after the first step.</li>
+<li><code>utils/recursive.c:179</code>, <code>utils/recursive.c:189</code>, <code>utils/recursive.c:194</code>, <code>utils/recursive.c:200</code>: use <code>(void)</code> in empty parameter lists.</li>
+<li><code>utils/recursive.c:212</code>: <code>Fibonacci</code> has no base case for <code>n &lt;= 0</code>, so invalid input causes unbounded recursion.</li>
+</ul>
+<h3 id="utils-scanf-char-c"><code>utils/scanf_char.c</code></h3>
+<ul>
+<li><code>utils/scanf_char.c:3</code>: use <code>int main(void)</code>.</li>
+<li><code>utils/scanf_char.c:7</code>, <code>utils/scanf_char.c:8</code>, <code>utils/scanf_char.c:10</code>: check <code>scanf</code> return values.</li>
+<li><code>utils/scanf_char.c:4</code>: <code>n</code> is read but never used.</li>
+<li>If input ends before <code>c</code>, the loop should stop instead of repeatedly trying to read.</li>
+</ul>
+<h3 id="utils-triangle-c"><code>utils/triangle.c</code></h3>
+<ul>
+<li><code>utils/triangle.c:11</code>: check <code>scanf</code> and validate <code>n &gt; 0</code>.</li>
+<li><code>utils/triangle.c:13</code>, <code>utils/triangle.c:14</code>: use unsigned loop variables or make <code>n</code> signed after validation.</li>
+</ul>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

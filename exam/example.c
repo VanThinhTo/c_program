@@ -298,3 +298,42 @@ int main(){
     printf("%d", count);
     return 0;
 }
+
+/*
+Another way to solve Question 3.
+
+Idea:
+- Do not create a temporary array.
+- Print elements from pos to the end.
+- Then print elements from the beginning to pos - 1.
+- This can be done with modulo:
+  arr[(pos + i) % n]
+*/
+void rotateArrAlternative(){
+    int n;
+
+    if (scanf("%d", &n)!=1 || n<=0){
+        printf("Invalid input\n");
+        return;
+    }
+
+    int arr[n];
+
+    for (int i=0; i<n; i++){
+        if (scanf("%d", &arr[i])!=1){
+            printf("Invalid input\n");
+            return;
+        }
+    }
+
+    int pos;
+    if (scanf("%d", &pos)!=1 || pos<0 || pos>=n){
+        printf("Invalid position\n");
+        return;
+    }
+
+    for (int i=0; i<n; i++){
+        printf("%d ", arr[(pos+i)%n]);
+    }
+    printf("\n");
+}
